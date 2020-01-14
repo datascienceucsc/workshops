@@ -1,0 +1,198 @@
+\documentclass{beamer}
+
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{dsfont}
+\usepackage{pythonhighlight}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan
+}
+
+
+% macros
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Ha}{\mathbb{H}}
+\newcommand{\C}{\mathbb{C}}
+
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+
+
+\usetheme{metropolis}   
+
+\title{Gradient Boosted Trees}
+\subtitle{A high-performing ``out-of the box'' model for structured data}
+\author{Anders Poirel}
+\institute{DSS@UCSC}
+
+\logo{\includegraphics[height=0.75cm]{figures/logo1.png}}
+
+\begin{document}
+
+\maketitle
+
+    \begin{frame}{Additive Models}
+        \begin{itemize}
+            \item Suppose we have models $f_1, \ldots, f_N$.
+            \item \alert{additive model}: model of the form $\hat{f}(x) = \sum_{i = 1}^n \hat{f}_i (x)$
+        
+            \item Additive models are a type of \alert{ensemble} models, models that combine several simpler models for increased performance. 
+        \end{itemize}   
+    \end{frame}
+
+    \begin{frame}{Motivation of Boosting (1)}
+        \begin{itemize}
+            \item \alert{weak} model: model that performs slightly better than random  chance
+            \item Idea of \alert{boosting}: combine many weak models to build a higher-performing one
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{Motivation of Boosting (2)}
+        \begin{itemize}
+            \item To improve performance of a simple model, build a \alert{sequence} of simple models that each fit to the error (\alert{residuals}) of the previous ones
+            \item Make this even more efficient by using \alert{pseudo-residuals} that give the direction in which the model can be most improved the most, by taking the gradient of the loss with respect to the previous model
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{Motivation of Boosting (3)}
+        What are residuals?
+        \begin{center}
+            \includegraphics[width=0.8\textwidth]{figures/residuals.png}
+        \end{center}
+    \end{frame}
+
+    \begin{frame}{Decision Trees (1)}
+        Decision trees make binary splits, partitioning the feature space into \alert{$p$-dimensional boxes}, where the predicted labels are the \alert{mean} value (or majority category for classification) of instances in that box.
+        \begin{center}
+            \includegraphics[width=0.6\textwidth]{figures/trees_fig_02.png}
+        \end{center}
+    \end{frame}
+
+    \begin{frame}{Decision Trees (2)}
+        Decision trees make binary splits, partitioning the feature space into \alert{$p$-dimensional boxes}, where the predicted labels are the \alert{mean} value (or majority category for classification) of instances in that box.
+        \begin{center}
+            \includegraphics[width=0.7\textwidth]{figures/trees_fig_03.png}
+        \end{center}
+    \end{frame}
+
+    \begin{frame}{Why Boost Decision Trees ?}
+        \begin{itemize}
+            \item Fast to construct with low tree depth
+            \item Easily mix categorical and numerical variables
+            \item Automatically perform feature selection so resistant to overfitting via too many predictors
+            \item Transformation-invariant
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{Gradient Tree Boosting Algorithm}
+        \begin{itemize}
+            \item[1.] Initialize $f_0(x) = \argmin_{\gamma} \sum_{i=1}^n L(y_i, \gamma)$ 
+            \item[2.] For $m = 1, \ldots, M$:
+            \begin{itemize}
+                \item[(a)] For $i = 1, \ldots N$ compute $r_{im} = - \Bigg[ \frac{\partial L(y_i, f(x_i))}{\partial f(x_i)}  \Bigg]_{f = f_{m-1}}$
+                \item[(b)] Fit regression tree to target $r_{im}$ giving terminal regions $R_{jm}, j = 1, \ldots, J_m$
+                \item[(c)] For $j = 1, \ldots, J_m$ compute $\gamma_{jm} = \argmin_{\gamma} \sum_{x_i \in R_{jm}} L(y_i, f_{m-1}(x_i) + \gamma)$
+                \item[(d)] Update $f_m(x) = f_{m-1}(x) + \sum_{j = 1}^{J_m}\gamma_{gm} \mathds{1}(x \in R_{jm}) $    
+            \end{itemize}  
+            \item[3.] Output $\hat{f} (x) = f_M(x)$
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{eXtreme Gradient Boosting (1)}
+        \begin{itemize}
+            \item \texttt{xgboost} is a framework implementing gradient boosted trees with arbitray loss functions with frontends in Python, R and others
+            \item \texttt{lightgbm} and \texttt{catboost} are other implementations of the algorithm worth looking into
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}[fragile]{eXtreme Gradient Boosting (2)}
+    
+    A minimal example with parameters that perform well in practice:
+
+    \begin{python}
+    import numpy as np
+    import xgboost as xgb
+        
+    X_train = np.load('X_train.npy')
+    y_train = np.load('y_train.npy')
+        
+    model = xgb.XGBRegressor(eta=0.1, num_estimators=100, max_tree_depth=2tree_method=hist, n_jobs=-1)
+    model.fit(X_train, y_train) 
+    \end{python}
+    %\begin{center}
+    %    \includegraphics[width=\textwidth]{example_1.png}
+    %\end{center}
+    \end{frame}
+
+    \begin{frame}{Tuning XGBoost (1)}
+        Important parameters:
+        \begin{itemize}
+            \item \texttt{learning\_rate} (alias \texttt{gamma}): step size shrinkage used in updates (range: $(0,1)$)
+            \item \texttt{max\_depth}: maximum depth of a tree
+            \item \texttt{min\_split\_loss} (alias \texttt{gamma}): minimum loss reduction required to make a partition on a leaf node
+            \item \texttt{reg\_lambda} or \texttt{reg\_alpha}: L2 (resp. L1) penalty term on weights
+            \item \texttt{subsample}: proportion of training data to use at each training step
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}[fragile]{Tuning XGBoost (2)}
+        Grid search example (assume same libraries as before)
+        \begin{python}
+        from sklearn.model_selection import GridSearchCV
+        params = { 'learning_rate' : [0.001, 0.01, 0.1, 1],
+                   'reg_lambda': [0, 1, 10],
+                   'min_split_loss': [0, 1, 10],
+                   'max_depth': [n for n in range(1,8)],
+                   'n_estimators': [25, 50, 100, 200]
+        }
+        model = GridSearchCV(model = XGBRegressor
+                            (tree_methond = hist),
+                            scoring = 
+                            'neg_mean_absolute_error',
+                            cv = 10, njobs = -1)
+        \end{python}
+    \end{frame}
+
+    \begin{frame}{Interpreting XGBoost (1)}
+        \begin{itemize}
+            \item For a single tree $T$ with $J-1$ internal nodes, \alert{importance} of feature $X_{l}$: $\mathcal{I}_{l}^2(T) = \sum_{t=1}^{J-1} \hat{i}_t^2 \mathds{1} (v(t) = l)$ where $\hat{i}_t^2$ is imporvement brought by split on that node
+            \item Generalize to ensembles of $M$ trees with $\mathcal{I}_{l}^2(T) = \frac{1}{M} \sum{m=1}^M \mathcal{I}_{l}^2(T_m) $
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{Interpreting XGBoost (2)}
+        An example of a feature importance plot (we usually scale with the largest importance at 1 or 100)
+
+        \begin{center}
+            \includegraphics[width=0.7\textwidth]{figures/feature_importance.png}
+        \end{center}
+
+    \end{frame}
+
+
+    \begin{frame}{When You Shouldn't Use Gradient Boosted Trees}
+        \begin{itemize}
+            \item you are working with unstructured data (text, image, video): variations of neural networks perform far better 
+            \item you need interpretable models (law, medicine): GBTs are a ``black-box'' algorithm
+            \item you don't have a lot of data: GBTs will easily overfit
+            \item you care about inference more than predictive power: rigorous statistical inference theory is an active research area for GBTs
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{References}
+        \begin{itemize}
+            \item Xgboost Developer, \textit{XGBoost Tutorials}, \href{https://xgboost.readthedocs.io/en/latest/tutorials/index.html}{https://xgboost.readthedocs.io/en/latest/tutorials/index.html} 2019
+            \item T. Chen, \textit{Introduction to Boosted Trees}, \href{https://homes.cs.washington.edu/~tqchen/pdf/BoostedTree.pdf}{https://homes.cs.washington.edu/~tqchen/pdf/BoostedTree.pdf}, University of Washington, 2014
+            % \item  G. James, D. Witten, T. Hastie, R. Tibshirani, Tree-Based Methods, \textit{Introduction to Statistical Learning}, Springer, 2013
+            \item T. Hastie, R. Tibshirani, J. Friedman, Boosting and Additive Methods. \textit{Elements of Statistical Learning}, Springer, 2011
+        \end{itemize}
+    \end{frame}
+
+\end{document}
