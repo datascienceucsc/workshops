@@ -162,13 +162,13 @@
 
     \begin{frame}{Interpreting XGBoost (1)}
         \begin{itemize}
-            \item For a single tree $T$ with $J-1$ internal nodes, \alert{importance} of feature $X_{l}$: $\mathcal{I}_{l}^2(T) = \sum_{t=1}^{J-1} \hat{i}_t^2 \mathds{1} (v(t) = l)$ where $\hat{i}_t^2$ is imporvement brought by split on that node
-            \item Generalize to ensembles of $M$ trees with $\mathcal{I}_{l}^2(T) = \frac{1}{M} \sum{m=1}^M \mathcal{I}_{l}^2(T_m) $
+            \item For a single tree $T$ with $J-1$ internal nodes, \alert{importance} of feature $X_{l}$: $\mathcal{I}_{l}^2(T) = \sum_{t=1}^{J-1} \hat{i}_t^2 \mathds{1} (v(t) = l)$ where $\hat{i}_t^2$ is the absolute loss decrease brought by split on that node
+            \item Generalize to ensembles of $M$ trees with $\mathcal{I}_{l}^2(T) = \frac{1}{M} \sum_{m=1}^M \mathcal{I}_{l}^2(T_m) $
         \end{itemize}
     \end{frame}
 
     \begin{frame}{Interpreting XGBoost (2)}
-        An example of a feature importance plot (we usually scale with the largest importance at 1 or 100)
+        Example of a feature importance plot (we usually scale feature importances to be in (0,1) or (0, 100) ranges)
 
         \begin{center}
             \includegraphics[width=0.7\textwidth]{figures/feature_importance.png}
