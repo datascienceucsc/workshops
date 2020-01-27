@@ -35,6 +35,7 @@ Make sure `res.cls` is in the same directory as your resume (you'll need to uplo
 A good starting point is the templates on 
 [https://www.rpi.edu/dept/arc/training/latex/resumes/](https://www.rpi.edu/dept/arc/training/latex/resumes/) - adapt the `.tex` file associated to the one that looks best to you.
 
+See `master-resume.pdf` for my LaTeX resume.
 
 ### Portfolio
 
@@ -55,6 +56,9 @@ Data Science specific tips:
 Neither of these are perfect! I wasn't aware of some of these guidelines a few months ago 🙂.
 - Github: [https://github.com/Jswig/Project-Portfolio/blob/master/README.md](https://github.com/Jswig/Project-Portfolio/blob/master/README.md)
 - Website: [https://www.julianlehrer.me/html/projects.html](https://www.julianlehrer.me/html/projects.html)
+
+#### More
+Dataqest has a good series of articles on this [here](https://www.dataquest.io/blog/build-a-data-science-portfolio/).
 
 
 ## Credits
