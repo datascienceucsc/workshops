@@ -1,8 +1,7 @@
 # Data Science Slugs Workshops
 *Anders Poirel*
 
-This (WIP) repository hosts all the deliverables for Data Science Slugs @ UCSC's workshops and activities - or at least those made by
-who bothered to use version control.
+This (WIP) repository hosts all the deliverables for Data Science Slugs @ UCSC's workshops and activities - or at least those were a member who bothered to use version control was in charge.
 
 ## Structure
 
