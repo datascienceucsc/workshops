@@ -151,3 +151,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+test_features.csv
+train_features.csv
+train_labels.csv
